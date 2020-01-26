@@ -39,8 +39,12 @@ public class User {
 		this.password = password;
 	}
 	
-	public String getName() {
-		return this.firstName + this.lastName;
+	public String getFirstName() {
+		return this.firstName;
+	}
+	
+	public String getLastName() {
+		return this.lastName;
 	}
 	
 	public String getEmail() {
@@ -49,6 +53,22 @@ public class User {
 	
 	public String getPassword() {
 		return this.password;
+	}
+	
+	public void setFirstName(String fname) {
+		this.firstName = fname;
+	}
+	
+	public void setLastName(String lname) {
+		this.lastName = lname;
+	}
+	
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	
 }
