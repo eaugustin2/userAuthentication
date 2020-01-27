@@ -13,50 +13,61 @@ import com.userAuthentication.repository.userRepository;
 public class UserService {
 
 	@Autowired
-	private PasswordEncoder encoder; //this interface is used after it was declared in bean configuration
+	private PasswordEncoder encoder; //this interface is used after it was declared in bean configuration to hash passwords and it also uses a random salt
 	
 	@Autowired
 	userRepository userRepo;
 	
+	
 	/*
-	 * Method to create a new user if the user does not already exist within repository
+	 * Method to check if this user has made an account already with this email address
+	 */
+	public boolean isUser(String email) {
+		User isUser = userRepo.findByEmail(email);
+		
+		if(isUser == null) {
+			return true;
+		}
+		return false;
+	}
+	
+	/*
+	 * Method to create a new user 
 	 */
 	public void createUser (User userObj) {
-		Optional<User> isUser = userRepo.findById(userObj.getId());
 		
-		if(!isUser.isPresent()) {
-			
+		//Check if user has been created 
+		
+		boolean checkUser = isUser(userObj.getEmail());
+		
+		if(checkUser == false) {
 			User newUser = new User();
 			newUser.setFirstName(userObj.getFirstName());
 			newUser.setLastName(userObj.getLastName());
 			newUser.setEmail(userObj.getEmail());
 			String hashedPassword = encoder.encode(userObj.getPassword());
 			newUser.setPassword(hashedPassword);
+			System.out.println("hashed password: " + hashedPassword);
 			userRepo.save(newUser);
 			System.out.println("New User has been created...");
-			
 		}
 		else {
-			System.out.println("This user already has an account...");
+			System.out.println("This email address is already in use...");
 		}
+	}
+	
+	/*
+	 * Method to get user by email
+	 */
+	User getUser(String email) {
+		User currUser = userRepo.findByEmail(email);
+		return currUser;
 	}
 	
 	/*
 	 * Method to update a users password
 	 */
 	public void updatePassword(User userObj, String password) {
-		Optional<User> isUser = userRepo.findById(userObj.getId());
 		
-		if(!isUser.isPresent()) {
-			System.out.println("This user does not exist...");
-		}
-		else {
-			User newUser = new User();
-			newUser.setFirstName(userObj.getFirstName());
-			newUser.setLastName(userObj.getLastName());
-			newUser.setEmail(userObj.getEmail());
-			newUser.setPassword(password);
-			userRepo.save(newUser);
-		}
 	}
 }
