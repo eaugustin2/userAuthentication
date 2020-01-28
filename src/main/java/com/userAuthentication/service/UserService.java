@@ -49,7 +49,7 @@ public class UserService {
 			newUser.setPassword(hashedPassword);
 			System.out.println("hashed password: " + hashedPassword);
 			userRepo.save(newUser);
-			System.out.println("New User has been created...");
+			System.out.println("New User has been created successfully...");
 		}
 		else {
 			System.out.println("This email address is already in use...");

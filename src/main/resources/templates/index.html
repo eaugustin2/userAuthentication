@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+ xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<title th:text="${title}"></title>
+</head>
+<body>
+	<h2>Login</h2>
+	<!-- Form will be handled by login page, no need to put action attribute because it is assumed -->
+	<form method="post" th:object="${user}">
+	
+		<div>
+			<label th:for="email">Email: </label>
+			<input type="email" th:field="*{email}"/>
+		</div>
+		
+		<div>
+			<label th:for="password">Password: </label>
+			<input type="password" th:field="*{password}"/>
+		</div>
+		
+		<input type="submit" value = "Login"/>
+		
+		<p>Don't have an account? <a th:href="@{register}">Let's Create one</a></p>
+		
+	</form>
+</body>
+</html>
