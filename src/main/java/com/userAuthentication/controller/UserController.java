@@ -30,9 +30,16 @@ public class UserController {
 	
 	//Might put index post for login
 	@PostMapping("login")
-	public String processLoginForm () {
+	public String processLoginForm (@ModelAttribute @Valid User user, Errors errors, Model model) {
+		boolean checkUser = userService.isUser(user.getEmail());
+		User regUser = userService.getUser(user.getEmail());
 		
-		return ""; //redirect to home page if get user is not null
+		if(checkUser == false) {
+			return "index";
+		}
+		
+		model.addAttribute("firstName",regUser.getFirstName());
+		return "welcome"; //redirect to home page if get user is not null
 	}
 	
 	@GetMapping("register")
@@ -44,7 +51,7 @@ public class UserController {
 	
 	@PostMapping("register")
 	public String processRegisterForm(@ModelAttribute @Valid User newUser, Errors errors, Model model) {
-		
+		System.out.println("made it to the post mapping of register");
 		if(errors.hasErrors()) {
 			return "register";
 		}

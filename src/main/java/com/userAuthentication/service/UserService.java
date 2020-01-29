@@ -25,10 +25,12 @@ public class UserService {
 	public boolean isUser(String email) {
 		User isUser = userRepo.findByEmail(email);
 		
+		
 		if(isUser == null) {
-			return true;
+			return false;
 		}
-		return false;
+		
+		return true;
 	}
 	
 	/*
@@ -59,7 +61,7 @@ public class UserService {
 	/*
 	 * Method to get user by email
 	 */
-	User getUser(String email) {
+	public User getUser(String email) {
 		User currUser = userRepo.findByEmail(email);
 		return currUser;
 	}
