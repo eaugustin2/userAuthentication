@@ -29,9 +29,22 @@ public class UserService {
 		if(isUser == null) {
 			return false;
 		}
-		
 		return true;
 	}
+	
+	
+	public boolean verifyUser(User u) {
+		User real = userRepo.findByEmail(u.getEmail()); //user from repository
+		
+		if(encoder.matches(u.getPassword(), real.getPassword())) {
+			System.out.println("The password matches...");
+			return true;
+		}
+		System.out.println("The password doesn't match...");
+		return false;
+	}
+	
+	
 	
 	/*
 	 * Method to create a new user 

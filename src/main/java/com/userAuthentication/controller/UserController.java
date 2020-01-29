@@ -28,13 +28,23 @@ public class UserController {
 		return "index";
 	}
 	
-	//Might put index post for login
+	/*
+	 * This controller needs to verify that email and password given match an email and its corresponding password
+	 */
 	@PostMapping("login")
 	public String processLoginForm (@ModelAttribute @Valid User user, Errors errors, Model model) {
 		boolean checkUser = userService.isUser(user.getEmail());
 		User regUser = userService.getUser(user.getEmail());
 		
+		//Checks if they are a user
 		if(checkUser == false) {
+			model.addAttribute("loginError", "There is no account created with this email");
+			return "index";
+		}
+		
+		//need to check if password matches, will also have to check if verified once completed
+		if(userService.verifyUser(user) == false) {
+			model.addAttribute("loginError", "Password is incorrect");
 			return "index";
 		}
 		
@@ -52,11 +62,19 @@ public class UserController {
 	@PostMapping("register")
 	public String processRegisterForm(@ModelAttribute @Valid User newUser, Errors errors, Model model) {
 		System.out.println("made it to the post mapping of register");
+		boolean emailInUse = userService.isUser(newUser.getEmail());
+		
 		if(errors.hasErrors()) {
 			return "register";
 		}
 		
+		if(emailInUse == true) {
+			model.addAttribute("emailRegistered","This email already has an account");
+			return "register";
+		}
+		
 		userService.createUser(newUser);
+		model.addAttribute("loginError","Account Created Successfully!");
 		return "index";
 	}
 }
