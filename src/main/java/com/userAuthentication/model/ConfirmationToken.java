@@ -20,8 +20,8 @@ public class ConfirmationToken {
 	private Date createdDate;
 	
 	//One to one relationship between token and user
-	@OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-	@JoinColumn(nullable = false, name = "user_id") //join column by using id of user
+	@OneToOne(targetEntity = User.class, fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+	@JoinColumn( name = "user_id") //join column by using id of user
 	private User user;
 	
 	public ConfirmationToken(User user) {
@@ -30,8 +30,11 @@ public class ConfirmationToken {
 		confirmationToken = UUID.randomUUID().toString();
 	}
 	
+	public ConfirmationToken() {
+		createdDate = new Date();
+	}
 	
-
+	
 	public int getTokenId() {
 		return tokenId;
 	}

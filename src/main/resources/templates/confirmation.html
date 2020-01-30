@@ -5,6 +5,8 @@
 <title>Confirmation Page</title>
 </head>
 <body>
-	<h2 th:text="message"></h2>
+	<p th:text="${message}"></p>
+	<h2 th:text="${tokenError}"></h2>
+	<a th:href="@{login}">Login Page</a>
 </body>
 </html>

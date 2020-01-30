@@ -79,6 +79,12 @@ public class UserService {
 		return currUser;
 	}
 	
+	public void updateVerifiedEmailUser(User user) {
+		User savedUser = userRepo.findByEmail(user.getEmail());
+		savedUser.setIsEnabled(user.getIsEnabled());
+		userRepo.save(savedUser);
+	}
+	
 	/*
 	 * Method to update a users password
 	 */

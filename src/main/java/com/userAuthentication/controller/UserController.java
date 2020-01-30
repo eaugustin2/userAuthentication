@@ -98,36 +98,64 @@ public class UserController {
 		//Attach a confirmationToken to user in db
 		//save confirmationToken
 		userService.createUser(newUser);
-		ConfirmationToken confirmationToken = new ConfirmationToken(newUser);
+		//Search recently created user to save in confirmationToken
+		User recentlySavedUser = userService.getUser(newUser.getEmail());
+		ConfirmationToken confirmationToken = new ConfirmationToken(recentlySavedUser);
+		
 		confirmationTokenRepository.save(confirmationToken);
 		
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		mailMessage.setTo(newUser.getEmail());
 		mailMessage.setSubject("Verify Email Address");
 		mailMessage.setFrom("noreplyuserAuthentication123@gmail.com");
-		mailMessage.setText("To confirm email address use link: " + "http:localhost:8080/confirm-account?token=" + confirmationToken.getConfirmationToken());
+		mailMessage.setText("To confirm email address use link: " + "http:localhost:8080/users/confirm-account?token=" + confirmationToken.getConfirmationToken());
 		
 		emailService.sendEmail(mailMessage);
 		
-		model.addAttribute("loginError","Email verified Successfully!");
-		model.addAttribute("loginError","Account Created Successfully, verify email address");
-		return "index";
+		
+		model.addAttribute("validation","Account Created Successfully, a validation email has been sent to: " + recentlySavedUser.getEmail());
+		return "validate";
 	}
 	
+	/*
 	@RequestMapping(value = "/confirm-account", method = {RequestMethod.GET, RequestMethod.POST})
-	public String confirmAccount(@RequestParam("token") String confirmationToken, Model model) {
+	public String confirmAccount(@RequestParam("token")String confirmationToken, Model model) {
 		
 		ConfirmationToken token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
 		
 		if(token != null) {
+			Need to search this by ID to get value
 			User user = userService.getUser(token.getUser().getEmail());
 			user.setIsEnabled(true);
-			//userService.createUser(user);
-			userRepo.save(user);
+			userService.createUser(user);
+			//userRepo.save(user);
 			model.addAttribute("message", "Account has been activated!");
 			return "index";
 		}
 		model.addAttribute("message", "There was an error with activation");
 		return "confirmation";
+	}
+	*/
+	
+	
+	@RequestMapping(value = "confirm-account", method = {RequestMethod.GET, RequestMethod.POST})
+	public String confirmAccount(@RequestParam("token") String confirmationToken, Model model) {
+		
+		System.out.println("test from confirm account...");
+		
+		ConfirmationToken token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
+		
+		//if this is a valid token given by mail system, enable user
+		if(token != null) {
+			User user = userService.getUser(token.getUser().getEmail());
+			user.setIsEnabled(true);
+			userService.updateVerifiedEmailUser(user);
+			model.addAttribute("message", "Congratulations " + user.getFirstName() + ", your account has been validated");
+			return "confirmation";
+		}
+		
+		model.addAttribute("message", "That is an invalid token...");
+		return "confirmation";
+		
 	}
 }
