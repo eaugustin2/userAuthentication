@@ -31,8 +31,10 @@ public class User {
 	@Column(name = "password")
 	private String password;
 	
+	private boolean isEnabled;
+	
 	public User() {
-		
+		this.isEnabled = false;
 	}
 	
 	public User(String firstName, String lastName, String email, String password) {
@@ -40,6 +42,7 @@ public class User {
 		this.lastName = lastName;
 		this.email = email;
 		this.password = password;
+		this.isEnabled = false;
 	}
 	
 	public int getId() {
@@ -62,6 +65,10 @@ public class User {
 		return this.password;
 	}
 	
+	public boolean getIsEnabled() {
+		return this.isEnabled;
+	}
+	
 	public void setFirstName(String fname) {
 		this.firstName = fname;
 	}
@@ -76,6 +83,10 @@ public class User {
 	
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	public void setIsEnabled(boolean value) {
+		this.isEnabled = value;
 	}
 	
 }

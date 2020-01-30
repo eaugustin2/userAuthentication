@@ -3,6 +3,7 @@ package com.userAuthentication.controller;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -10,9 +11,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.userAuthentication.service.EmailService;
 import com.userAuthentication.service.UserService;
+import com.userAuthentication.model.ConfirmationToken;
 import com.userAuthentication.model.User;
+import com.userAuthentication.repository.ConfirmationTokenRepository;
+import com.userAuthentication.repository.userRepository;
 
 @Controller
 @RequestMapping("users")
@@ -20,6 +27,15 @@ public class UserController {
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired 
+	private ConfirmationTokenRepository confirmationTokenRepository;
+	
+	@Autowired
+	private EmailService emailService;
+	
+	@Autowired
+	private userRepository userRepo;
 	
 	@GetMapping("login")
 	public String indexPage(Model model) {
@@ -48,6 +64,11 @@ public class UserController {
 			return "index";
 		}
 		
+		if(regUser.getIsEnabled() != true) {
+			model.addAttribute("loginError", "This account is not validated...");
+			return "index";
+		}
+		
 		model.addAttribute("firstName",regUser.getFirstName());
 		return "welcome"; //redirect to home page if get user is not null
 	}
@@ -73,8 +94,40 @@ public class UserController {
 			return "register";
 		}
 		
+		//If passes all tests create user
+		//Attach a confirmationToken to user in db
+		//save confirmationToken
 		userService.createUser(newUser);
-		model.addAttribute("loginError","Account Created Successfully!");
+		ConfirmationToken confirmationToken = new ConfirmationToken(newUser);
+		confirmationTokenRepository.save(confirmationToken);
+		
+		SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setTo(newUser.getEmail());
+		mailMessage.setSubject("Verify Email Address");
+		mailMessage.setFrom("noreplyuserAuthentication123@gmail.com");
+		mailMessage.setText("To confirm email address use link: " + "http:localhost:8080/confirm-account?token=" + confirmationToken.getConfirmationToken());
+		
+		emailService.sendEmail(mailMessage);
+		
+		model.addAttribute("loginError","Email verified Successfully!");
+		model.addAttribute("loginError","Account Created Successfully, verify email address");
 		return "index";
+	}
+	
+	@RequestMapping(value = "/confirm-account", method = {RequestMethod.GET, RequestMethod.POST})
+	public String confirmAccount(@RequestParam("token") String confirmationToken, Model model) {
+		
+		ConfirmationToken token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
+		
+		if(token != null) {
+			User user = userService.getUser(token.getUser().getEmail());
+			user.setIsEnabled(true);
+			//userService.createUser(user);
+			userRepo.save(user);
+			model.addAttribute("message", "Account has been activated!");
+			return "index";
+		}
+		model.addAttribute("message", "There was an error with activation");
+		return "confirmation";
 	}
 }
