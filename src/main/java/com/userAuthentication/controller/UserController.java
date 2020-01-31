@@ -55,6 +55,10 @@ public class UserController {
 		boolean checkUser = userService.isUser(user.getEmail());
 		User regUser = userService.getUser(user.getEmail());
 		
+		if(errors.hasErrors()) {
+			return "index";
+		}
+		
 		//Checks if they are a user
 		if(checkUser == false) {
 			model.addAttribute("loginError", "There is no account created with this email");
@@ -205,27 +209,15 @@ public class UserController {
 		System.out.println("Model Attribute Name from form: " + user.getFirstName());
 		
 		System.out.println("password from form: " + user.getPassword());
-		userService.updatePassword(user);
+		boolean diffPass = userService.updatePassword(user);
+		
+		if(diffPass == false) {
+			model.addAttribute("message", "New password cannot be the same as previous password");
+			return "resetPassword";
+		}
 		model.addAttribute("message", "Password has been successfully changed!");
 		return "confirmation";
 	}
 	
-	
-	/*
-	@RequestMapping(value = "reset-password", method= {RequestMethod.GET, RequestMethod.POST})
-	public String resetPassword2(@RequestParam("resetToken") String resetToken, Model model) {
-		
-		ResetPasswordToken resetPasswordToken = resetPasswordTokenRepository.findByResetPasswordToken(resetToken);
-		
-		if(resetPasswordToken != null) {
-			User user = userService.getUser(resetPasswordToken.getUser().getEmail());
-			userService.updatePassword(user);
-			model.addAttribute("message", "Change password for: " + user.getEmail());
-			return "resetPassword";
-		}
-		model.addAttribute("tokenError", "This is an incorrectToken");
-		return "confirmation";
-	}
-	*/
 	
 }

@@ -3,10 +3,50 @@
  xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8"/>
+<meta http-equiv = "X-UA-Compatible" content = "IE=edge">
+<meta name = "viewport" content = "width = device-width, initial-scale = 1">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 <title th:text="${title}"></title>
 </head>
 <body>
+	
+	
+	<div class = "container">
+	
 	<h2>Create a new account</h2>
+		
+		<form method="post" th:object="${user}">
+			
+			<div class="form-group">
+				<label th:for="firstName">First Name: </label>
+				<input type="text" th:field="*{firstName}" class="form-control" placeholder="First Name"/>
+				<span th:errors="*{firstName}"></span>
+			</div>
+			
+			<div class= "form-group">
+				<label th:for="lastName">Last Name: </label>
+				<input type="text" th:field="*{lastName}" class="form-control" placeholder="Last Name"/>
+				<span th:errors="*{lastName}"></span>
+			</div>
+			
+			<div class = "form-group">
+				<label th:for="email">Email: </label>
+				<input type="email" th:field="*{email}" class = "form-control" placeholder = "Email"/>
+				<span th:errors="*{email}"></span>
+			</div>
+			
+			<div class = "form-group">
+				<label th:for="password">Password: </label>
+				<input type="password" th:field="*{password}" class="form-control" placeholder="Password"/>
+				<span th:errors="*{password}"></span>
+			</div>
+			
+			<button type = "submit" class = "btn btn-primary">Sign Up</button>
+		</form>
+		
+	</div>
+	
+	<!--  
 	
 	<h4 th:text="${emailRegistered}"></h4>
 	
@@ -34,6 +74,8 @@
 		
 		<input type="submit" value="Sign Up" />
 	</form>
+	
+	-->
 	
 </body>
 </html>
