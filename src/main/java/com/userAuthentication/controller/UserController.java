@@ -183,8 +183,11 @@ public class UserController {
 		
 		ResetPasswordToken resetPasswordToken = resetPasswordTokenRepository.findByResetPasswordToken(resetToken);
 		
+		
 		if(resetPasswordToken != null) {
-			model.addAttribute(new User());
+			User user = userService.getUser(resetPasswordToken.getUser().getEmail());
+			System.out.println("Name from get mapping: " + user.getFirstName());
+			model.addAttribute(user);
 			model.addAttribute("message", "Reset Password for " + resetPasswordToken.getUser().getEmail());
 			return "resetPassword";
 			//need a userService method to update password
@@ -193,13 +196,36 @@ public class UserController {
 		return "validate";
 	}
 	
+	
+	
 	@PostMapping("reset-password")
 	public String processResetPasswordForm(@ModelAttribute User user, Model model) {
 		//Call method to reset password and such...
+		
+		System.out.println("Model Attribute Name from form: " + user.getFirstName());
+		
 		System.out.println("password from form: " + user.getPassword());
 		userService.updatePassword(user);
-		model.addAttribute("loginError", "Password has been successfully changed!");
-		return "index";
+		model.addAttribute("message", "Password has been successfully changed!");
+		return "confirmation";
 	}
+	
+	
+	/*
+	@RequestMapping(value = "reset-password", method= {RequestMethod.GET, RequestMethod.POST})
+	public String resetPassword2(@RequestParam("resetToken") String resetToken, Model model) {
+		
+		ResetPasswordToken resetPasswordToken = resetPasswordTokenRepository.findByResetPasswordToken(resetToken);
+		
+		if(resetPasswordToken != null) {
+			User user = userService.getUser(resetPasswordToken.getUser().getEmail());
+			userService.updatePassword(user);
+			model.addAttribute("message", "Change password for: " + user.getEmail());
+			return "resetPassword";
+		}
+		model.addAttribute("tokenError", "This is an incorrectToken");
+		return "confirmation";
+	}
+	*/
 	
 }
