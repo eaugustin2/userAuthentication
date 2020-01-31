@@ -88,7 +88,11 @@ public class UserService {
 	/*
 	 * Method to update a users password
 	 */
-	public void updatePassword(User userObj, String password) {
-		
+	public void updatePassword(User userObj) {
+		User regUser = userRepo.findByEmail(userObj.getEmail());
+		System.out.println("value of password in service: " + userObj.getPassword());
+		String hashedPassword = encoder.encode(userObj.getPassword());
+		regUser.setPassword(hashedPassword);
+		userRepo.save(regUser);
 	}
 }

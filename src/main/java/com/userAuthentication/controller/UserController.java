@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.userAuthentication.service.EmailService;
 import com.userAuthentication.service.UserService;
 import com.userAuthentication.model.ConfirmationToken;
+import com.userAuthentication.model.ResetPasswordToken;
 import com.userAuthentication.model.User;
 import com.userAuthentication.repository.ConfirmationTokenRepository;
+import com.userAuthentication.repository.ResetPasswordTokenRepository;
 import com.userAuthentication.repository.userRepository;
 
 @Controller
@@ -32,10 +34,11 @@ public class UserController {
 	private ConfirmationTokenRepository confirmationTokenRepository;
 	
 	@Autowired
-	private EmailService emailService;
+	private ResetPasswordTokenRepository resetPasswordTokenRepository;
 	
 	@Autowired
-	private userRepository userRepo;
+	private EmailService emailService;
+	
 	
 	@GetMapping("login")
 	public String indexPage(Model model) {
@@ -117,26 +120,6 @@ public class UserController {
 		return "validate";
 	}
 	
-	/*
-	@RequestMapping(value = "/confirm-account", method = {RequestMethod.GET, RequestMethod.POST})
-	public String confirmAccount(@RequestParam("token")String confirmationToken, Model model) {
-		
-		ConfirmationToken token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
-		
-		if(token != null) {
-			Need to search this by ID to get value
-			User user = userService.getUser(token.getUser().getEmail());
-			user.setIsEnabled(true);
-			userService.createUser(user);
-			//userRepo.save(user);
-			model.addAttribute("message", "Account has been activated!");
-			return "index";
-		}
-		model.addAttribute("message", "There was an error with activation");
-		return "confirmation";
-	}
-	*/
-	
 	
 	@RequestMapping(value = "confirm-account", method = {RequestMethod.GET, RequestMethod.POST})
 	public String confirmAccount(@RequestParam("token") String confirmationToken, Model model) {
@@ -154,8 +137,69 @@ public class UserController {
 			return "confirmation";
 		}
 		
-		model.addAttribute("message", "That is an invalid token...");
+		model.addAttribute("tokenError", "That is an invalid token...");
 		return "confirmation";
 		
 	}
+	
+	@GetMapping("forgotPassword")
+	public String forgotPassword(Model model) {
+		model.addAttribute("title","Reset Password");
+		model.addAttribute(new User());
+		return "forgotPassword";
+	}
+	
+	//after customer presses link, they should be brought to reset password page to enter a new password, then be brought to index once done
+	
+	@PostMapping("forgotPassword")
+	public String processForgotPasswordForm(@ModelAttribute User user, Model model) {
+		//This method will be for processing the data recieved from form in forgot password so the user will get an email then use the link in the email to reset their password
+		
+		boolean checkUser = userService.isUser(user.getEmail());
+		
+		if(checkUser == false) {
+			model.addAttribute("errorMessage", "This email is not associated with any account");
+			return "forgotPassword";
+		}
+		
+		User registeredUser = userService.getUser(user.getEmail());
+		ResetPasswordToken resetPasswordToken = new ResetPasswordToken(registeredUser);
+		resetPasswordTokenRepository.save(resetPasswordToken);
+		
+		SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setTo(user.getEmail());
+		mailMessage.setSubject("Reset Password");
+		mailMessage.setFrom("noreplyuserAuthentication123@gmail.com");
+		mailMessage.setText("To reset your password use link: " + "http:localhost:8080/users/reset-password?resetToken=" + resetPasswordToken.getResetPasswordToken());
+		
+		emailService.sendEmail(mailMessage);
+		model.addAttribute("validation", "A reset password link has been sent to: " + user.getEmail());
+		return "validate";
+	}
+	
+	@GetMapping("reset-password")
+	public String resetPassword(@RequestParam("resetToken") String resetToken, Model model) {
+		//Need to make a resetPassword page
+		
+		ResetPasswordToken resetPasswordToken = resetPasswordTokenRepository.findByResetPasswordToken(resetToken);
+		
+		if(resetPasswordToken != null) {
+			model.addAttribute(new User());
+			model.addAttribute("message", "Reset Password for " + resetPasswordToken.getUser().getEmail());
+			return "resetPassword";
+			//need a userService method to update password
+		}
+		model.addAttribute("validation", "Error, that token is not valid");
+		return "validate";
+	}
+	
+	@PostMapping("reset-password")
+	public String processResetPasswordForm(@ModelAttribute User user, Model model) {
+		//Call method to reset password and such...
+		System.out.println("password from form: " + user.getPassword());
+		userService.updatePassword(user);
+		model.addAttribute("loginError", "Password has been successfully changed!");
+		return "index";
+	}
+	
 }
